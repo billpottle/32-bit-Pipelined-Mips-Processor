@@ -1,4 +1,4 @@
-# 32-bit-Pipenlined-Mips-Processor
+# 32-bit-Pipelined-Mips-Processor
 In this project we built a 5 stage pipelined processor in software that executed a subset of MIPS instructions. We used transistors to built logic gates, then used the gates to build up larger components. 
 
 Here is a basic overview of the architecture. The processor takes an array of 32 bits representing wires being on or off, and is able to successfully run programs with a clock cycle time of 50ns (20 mHz)
