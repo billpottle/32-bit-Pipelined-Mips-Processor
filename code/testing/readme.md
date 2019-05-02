@@ -12,6 +12,6 @@ andi,ori,xori,and,or,xor,nor
 
 lb,lh,lhu,lbu,lw,sw,sb,sh
 
-**testbranchjump.src:** This file tests the rest of the operations (including lui). Success is defined as PC being updated correctly to the jump or branch address. This is the rest of the instructions: 
+**testbranch.src:** This file tests the rest of the operations (including lui). Success is defined as PC being updated correctly to the jump or branch address. This is the rest of the instructions: 
 
 j, jal, beq, bne, blez, bgtz, jr, jalr, bltz, bgez, bltzal, bgezal, lui. 
