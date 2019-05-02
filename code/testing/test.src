@@ -1,0 +1,210 @@
+
+vector busAluresult c.Aluresult.d[{31:0}]
+vector busPC c.PC.d[{31:0}]
+vector busDatain c.Datain.d[{31:0}]
+vector busIR c.IR.d[{31:0}]
+
+vector CLOCK CLK _CLK
+clock CLOCK 01 10
+
+stepsize 200
+
+vector target2 c.target2.d[{31:0}]
+
+
+vector reg1 c.r.r[1].out[{31:0}]
+vector reg4 c.r.r[4].out[{31:0}]
+vector reg3 c.r.r[3].out[{31:0}]
+vector reg2 c.r.r[2].out[{31:0}]
+vector reg5 c.r.r[5].out[{31:0}]
+vector reg6 c.r.r[6].out[{31:0}]
+vector reg7 c.r.r[7].out[{31:0}]
+vector reg8 c.r.r[8].out[{31:0}]
+vector reg9 c.r.r[9].out[{31:0}]
+vector reg10 c.r.r[10].out[{31:0}]
+vector reg11 c.r.r[11].out[{31:0}]
+vector reg12 c.r.r[12].out[{31:0}]
+vector reg13 c.r.r[13].out[{31:0}]
+vector reg14 c.r.r[14].out[{31:0}]
+vector reg15 c.r.r[15].out[{31:0}]
+vector reg16 c.r.r[16].out[{31:0}]
+vector reg23 c.r.r[23].out[{31:0}]
+vector reg24 c.r.r[24].out[{31:0}]
+vector reg25 c.r.r[25].out[{31:0}]
+vector reg26 c.r.r[26].out[{31:0}]
+vector reg27 c.r.r[27].out[{31:0}]
+vector reg17 c.r.r[17].out[{31:0}]
+vector reg18 c.r.r[18].out[{31:0}]
+vector reg19 c.r.r[19].out[{31:0}]
+vector reg20 c.r.r[20].out[{31:0}]
+vector reg21 c.r.r[21].out[{31:0}]
+vector reg22 c.r.r[22].out[{31:0}]
+vector reg29 c.r.r[29].out[{31:0}]
+vector reg31 c.r.r[31].out[{31:0}]
+vector reg28 c.r.r[28].out[{31:0}]
+vector reg30 c.r.r[30].out[{31:0}]
+
+vector RW c.r.RW[{4:0}]
+
+vector busPCtemp c.a.PCtemp.d[{31:0}]
+vector busPCtemp2 c.a.PCtemp2.d[{31:0}]
+vector busPCtemp3 c.a.PCtemp3.d[{31:0}]
+vector busPCbranch c.a.PCbranch.d[{31:0}]
+vector busPC4 c.a.PC4.d[{31:0}]
+
+
+vector luiwrite2 c.b.luiwrite2.d[{31:0}]
+vector Datatoex c.b.Datatoex.d[{31:0}]
+
+vector bjtargettemp2 c.b.bjtargettemp2.d[{31:0}]
+vector bjtargettemp5 c.b.bjtargettemp5.d[{31:0}]
+vector bjtargettemp3 c.b.bjtargettemp3.d[{31:0}]
+
+vector busRS c.RS.d[{31:0}]
+vector busRT c.RT.d[{31:0}]
+vector busIMM c.IMM.d[{31:0}]
+
+vector busRS2 c.RS2.d[{31:0}]
+vector busRT2 c.RT2.d[{31:0}]
+vector busIMM2 c.IMM2.d[{31:0}]
+vector busAluresult c.Aluresult.d[{31:0}]
+
+vector rw c.rw[{4:0}]
+vector rw2 c.rw2[{4:0}]
+vector rw3 c.rw3[{4:0}]
+vector rw4 c.rw4[{4:0}]
+
+vector Iin Iin[{31:0}]
+
+ana CLOCK busPC busAluresult reg1 reg2 reg3 reg4 reg5 reg6 reg7 reg8 reg9 reg10 reg11 reg12 reg13 reg14 reg15 reg16 reg17 reg18 reg19 reg20 reg21 reg22 reg23 reg24 reg25 reg26 reg27 reg28 reg29 reg30 reg31 
+
+h Reset
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+l Reset
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+
