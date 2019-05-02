@@ -3,3 +3,17 @@ In this project we built a 5 stage pipelined processor in software that executed
 
 Here is a basic overview of the architecture
 ![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/CPUOverview.jpg)
+
+The processor executes parts of 5 instructions at once through the use of various stages. The **Instruction Fetch (IF) Stage** is reasonsible for fetching which instruction to begin. In the **RD Stage**, the processor decodes which instruction to accomplish.  The **Execute (EX)** stage used the Arithmetic and Logic Unit (ALU) to perform the calculation. **The Memory (MEM) Stage** accesses memory if necessary, and the **WriteBack (WB) Stage** writes the result to memory.  
+
+In the diagrams below, a thick line representes up to 32 wires, and three dots signify a jump between the first and last copy of an element. 
+IF Stage
+![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/IF.jpg)
+RD Stage
+![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/RD.jpg)
+EX Stage
+![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/EX.jpg)
+MEM Stage
+![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/MEM.jpg)
+WB Stage
+![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/WB.jpg)
