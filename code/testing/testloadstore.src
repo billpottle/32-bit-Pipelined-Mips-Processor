@@ -1,0 +1,256 @@
+vector CLOCK CLK _CLK
+clock CLOCK 01 10
+
+stepsize 300
+
+vector busPCtemp c.a.PCtemp3.d[{31:0}]
+vector busPCtemp2 c.a.PCtemp3.d[{31:0}]
+vector busPCtemp3 c.a.PCtemp3.d[{31:0}]
+vector busPCbranch c.a.PCbranch.d[{31:0}]
+vector busPC4 c.a.PC4.d[{31:0}]
+vector busfour c.a.four.d[{31:0}]
+
+vector bustarget c.target.d[{31:0}]
+vector bustarget2 c.target2.d[{31:0}]
+
+vector busRS c.RS.d[{31:0}]
+vector busRT c.RT.d[{31:0}]
+vector busIMM c.IMM.d[{31:0}]
+
+vector busRS2 c.RS2.d[{31:0}]
+vector busRT2 c.RT2.d[{31:0}]
+vector busIMM2 c.IMM2.d[{31:0}]
+
+vector busAluresult c.Aluresult.d[{31:0}]
+vector busAluresult2 c.Aluresult2.d[{31:0}]
+vector busAluresult3 c.Aluresult3.d[{31:0}]
+
+vector busLW c.LW.d[{31:0}]
+
+vector busDataout c.Dataout.d[{31:0}]
+vector busDatain c.Datain.d[{31:0}]
+
+vector busPC c.PC.d[{31:0}]
+vector busPC1 c.PC1.d[{31:0}]
+vector busPC2 c.PC2.d[{31:0}]
+vector busPC3 c.PC3.d[{31:0}]
+vector busPC4 c.PC4.d[{31:0}]
+
+vector busIR c.IR.d[{31:0}]
+vector busIR1 c.IR1.d[{31:0}]
+vector busIR2 c.IR2.d[{31:0}]
+vector busIR3 c.IR3.d[{31:0}]
+vector busIR4 c.IR4.d[{31:0}]
+
+vector rw c.rw[{4:0}]
+vector rw2 c.rw2[{4:0}]
+vector rw3 c.rw3[{4:0}]
+vector rw4 c.rw4[{4:0}]
+
+vector Din c.m.din.d[{31:0}]
+vector Dout c.m.dout.d[{31:0}]
+vector Daddr c.m.daddr.d[{31:0}]
+vector Din1 c.m.Din1[{31:0}]
+vector Dout1 c.m.Dout1[{31:0}]
+
+vector douttemp c.m.douttemp.d[{31:0}]
+vector douttemp2 c.m.douttemp2.d[{31:0}]
+vector douttemp3 c.m.douttemp3.d[{31:0}]
+vector douttemp4 c.m.douttemp4.d[{31:0}]
+vector douttemp5 c.m.douttemp5.d[{31:0}]
+vector douttemp6 c.m.douttemp6.d[{31:0}]
+vector douttemp7 c.m.douttemp7.d[{31:0}]
+
+//Don't forget to add DMC0,DMC0
+h Reset
+
+ana CLOCK busPC busIR 
+
+ana busIR1 busRS busRT busIMM busDataout bustarget c.1ext c.write2
+ana busAluresult
+ana busRS2 busRT2 busDatain
+ana rw4
+
+ana Din Dout Din1 Dout1 Daddr c.m.m.DMC0 c.m.m.DMC1
+ana douttemp douttemp7
+
+l c.dobranch c.dojump c.1ext c.write c.alu
+
+l c.d.isimm
+
+l c.d.aluc.add c.d.aluc.sub c.d.aluc.and c.d.aluc.xor c.d.aluc.nor c.d.aluc.or c.d.aluc.slt c.d.aluc.sltu c.d.aluc.sra c.d.aluc.sll c.d.aluc.srl c.b.beq c.b.blez c.b.bgtz c.b.bltz c.b.bgez c.b.bltzal c.b.bgezal c.b.j c.b.jal c.b.jr c.b.jalr c.d.sllv c.d.srlv c.d.srav c.b.lui c.m.lb c.m.lbu c.m.lh c.m.lhu c.m.lw c.m.sb c.m.sh c.m.sw c.b.bne
+
+vector reg1 c.r.r[1].out[{31:0}]
+vector reg14 c.r.r[14].out[{31:0}]
+vector reg15 c.r.r[15].out[{31:0}]
+vector reg16 c.r.r[16].out[{31:0}]
+vector reg17 c.r.r[17].out[{31:0}]
+vector reg18 c.r.r[18].out[{31:0}]
+vector reg3 c.r.r[3].out[{31:0}]
+vector reg2 c.r.r[2].out[{31:0}]
+vector reg19 c.r.r[19].out[{31:0}]
+vector reg10 c.r.r[10].out[{31:0}]
+
+
+vector RW c.r.RW[{4:0}]
+
+ana reg3 reg14 reg15 reg19 reg16 reg17 reg18 reg2 reg1 reg10 RW
+
+
+set bustarget %x00000000
+c
+c
+c
+c
+c
+l Reset
+!Load -1 into reg 15 and 3 into reg 3
+h c.write2
+set rw3 01111
+set busDatain %xffffffff
+c
+c
+c
+c
+c
+c
+c
+c
+set rw3 00011
+set busDatain %x00000003
+c
+c
+c
+c
+c
+c
+c
+c
+c
+x rw3
+x busDatain
+l c.write2
+
+h c.d.isimm
+h c.d.aluc.add
+/*sw $3, 100($0)*/
+set busIR 10101100000000110000000001100100
+l c.alu
+h c.m.sw
+c
+c
+c
+c
+/*lw $4, 100($0)*/
+l c.m.sw
+h c.m.lw
+set busIR 10001100000000010000000001100100
+c
+c
+c
+c
+c
+h c.write2
+c
+l c.write2
+c
+c
+l c.m.lw
+h c.m.sh
+/*sh $15, 102($0)
+set busIR 10100100000011110000000001100110
+c
+c
+c
+c
+l c.m.sh
+h c.m.lh
+/*lh $14, 102($0)
+set busIR 10000100000011100000000001100110
+c
+c
+c
+c
+c
+h c.write2
+c
+c
+c
+l c.write2
+c
+c
+l c.m.lh
+h c.m.lhu
+/*lhu $16, 102($0)
+set busIR 10010100000100000000000001100110
+c
+c
+c
+c
+c
+h c.write2
+c
+c
+c
+l c.write2
+c
+c
+
+l c.m.lhu
+h c.m.sb
+/*sb $15, 103($0)
+set busIR 10100000000011110000000001100111
+c
+c
+c
+c
+l c.m.sb
+h c.m.lb
+/*lb $18, 103($0)
+set busIR 10000000000100100000000001100111
+c
+c
+c
+c
+c
+h c.write2
+c
+c
+c
+l c.write2
+c
+c
+l c.m.lb
+h c.m.lbu
+/*lhu $19, 103($0)
+set busIR 10010000000100110000000001100111
+c
+c
+c
+c
+c
+h c.write2
+c
+c
+c
+l c.write2
+c
+c
+l c.m.lbu
+h c.b.lui
+/*lui $10, 15*/
+set busIR 00111100000010100000000000001111
+c
+c
+c
+c
+c
+h c.write2
+c
+c
+l c.write2
+c
+c
+
+
+

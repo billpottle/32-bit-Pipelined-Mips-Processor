@@ -1,0 +1,307 @@
+vector CLOCK CLK _CLK
+clock CLOCK 01 10
+
+stepsize 300
+
+vector busPCtemp c.a.PCtemp3.d[{31:0}]
+vector busPCtemp2 c.a.PCtemp3.d[{31:0}]
+vector busPCtemp3 c.a.PCtemp3.d[{31:0}]
+vector busPCbranch c.a.PCbranch.d[{31:0}]
+vector busPC4 c.a.PC4.d[{31:0}]
+vector busfour c.a.four.d[{31:0}]
+
+vector bustarget c.target.d[{31:0}]
+vector bustarget2 c.target2.d[{31:0}]
+
+vector busRS c.RS.d[{31:0}]
+vector busRT c.RT.d[{31:0}]
+vector busIMM c.IMM.d[{31:0}]
+
+vector busRS2 c.RS2.d[{31:0}]
+vector busRT2 c.RT2.d[{31:0}]
+vector busIMM2 c.IMM2.d[{31:0}]
+
+vector busAluresult c.Aluresult.d[{31:0}]
+vector busAluresult2 c.Aluresult2.d[{31:0}]
+vector busAluresult3 c.Aluresult3.d[{31:0}]
+
+vector busLW c.LW.d[{31:0}]
+
+vector busDataout c.Dataout.d[{31:0}]
+vector busDatain c.Datain.d[{31:0}]
+
+vector busPC c.PC.d[{31:0}]
+vector busPC1 c.PC1.d[{31:0}]
+vector busPC2 c.PC2.d[{31:0}]
+vector busPC3 c.PC3.d[{31:0}]
+vector busPC4 c.PC4.d[{31:0}]
+
+vector busIR c.IR.d[{31:0}]
+vector busIR1 c.IR1.d[{31:0}]
+vector busIR2 c.IR2.d[{31:0}]
+vector busIR3 c.IR3.d[{31:0}]
+vector busIR4 c.IR4.d[{31:0}]
+
+vector rw c.rw[{4:0}]
+vector rw2 c.rw2[{4:0}]
+vector rw3 c.rw3[{4:0}]
+
+//Don't forget to add DMC0,DMC0
+h Reset
+
+ana CLOCK busPC busIR 
+
+ana busRS busRT busIMM busDataout bustarget c.1ext c.write
+ana busAluresult busDatain
+
+l c.dobranch c.dojump c.1ext c.write c.alu
+
+l c.d.isimm
+
+l c.d.aluc.add c.d.aluc.sub c.d.aluc.and c.d.aluc.xor c.d.aluc.nor c.d.aluc.or c.d.aluc.slt c.d.aluc.sltu c.d.aluc.sra c.d.aluc.sll c.d.aluc.srl c.b.beq c.b.blez c.b.bgtz c.b.bltz c.b.bgez c.b.bltzal c.b.bgezal c.b.j c.b.jal c.b.jr c.b.jalr c.d.sllv c.d.srlv c.d.srav c.b.lui c.m.lb c.m.lbu c.m.lh c.m.lhu c.m.lw c.m.sb c.m.sh c.m.sw c.b.bne
+
+vector reg1 c.r.r[1].out[{31:0}]
+vector reg15 c.r.r[15].out[{31:0}]
+vector reg3 c.r.r[3].out[{31:0}]
+vector reg2 c.r.r[2].out[{31:0}]
+vector reg4 c.r.r[4].out[{31:0}]
+vector reg5 c.r.r[5].out[{31:0}]
+
+vector RW c.r.RW[{4:0}]
+
+ana reg3 reg15 reg2 reg1 reg4 reg5 RW
+
+vector RA c.b.r.RA[{4:0}]
+vector RB c.b.r.RB[{4:0}]
+vector cmpin c.b.cmpin.d[{31:0}] 
+vector PC4temp c.b.PC4temp.d[{31:0}]
+vector PC4temp2 c.b.PC4temp2.d[{31:0}]
+vector bjtargettemp c.b.bjtargettemp.d[{31:0}]
+vector bjtargettemp2 c.b.bjtargettemp2.d[{31:0}]
+vector bjtargettemp2a c.b.bjtargettemp2a.d[{31:0}]
+vector bjtargettemp3 c.b.bjtargettemp3.d[{31:0}]
+vector bjtargettemp4 c.b.bjtargettemp4.d[{31:0}]
+vector bjtargettemp5 c.b.bjtargettemp5.d[{31:0}]
+vector bjtarget c.b.bjtarget.d[{31:0}]
+vector Dataintemp c.b.Dataintemp.d[{31:0}]
+vector Dataintemp2 c.b.Dataintemp2.d[{31:0}]
+
+ana RA RB A B c.b.beq cmpin c.b.kequal c.b.lessthan c.b.greaterthan
+ana c.b.branch1t c.b.branch2t c.b.branch3t c.b.branch4t c.b.branch5t c.b.branch6t c.b.branch7t c.b.branch8t
+ana PC4temp PC4temp2 bjtargettemp bjtargettemp2 bjtargettemp2a bjtargettemp3 bjtargettemp4 bjtargettemp5 bjtarget Dataintemp Dataintemp2
+
+set bustarget %x00000000
+c
+c
+c
+c
+c
+l Reset
+!Load -1 into reg 15 and 3 into reg 3
+h c.write2
+set rw3 01111
+set busDatain %xffffffff
+c
+c
+c
+c
+c
+c
+c
+c
+set rw3 00011
+set busDatain %x00000003
+c
+c
+c
+c
+c
+c
+c
+c
+c
+set bustarget %x00000000
+c
+c
+c
+c
+c
+l Reset
+!Load 1 into reg 1 and 1 into reg 4
+h c.write2
+set rw3 00001
+set busDatain %x00000001
+c
+c
+c
+c
+c
+c
+c
+c
+set rw3 00100
+set busDatain %x00000001
+c
+c
+c
+c
+c
+c
+c
+c
+c
+x rw3
+x busDatain
+l c.write2
+c
+c
+
+
+h c.dobranch
+l c.dojump
+ana c.dobranch c.dojump
+
+h c.b.beq
+/*beq $1, $4, 16*/
+set busIR 00010000001001000000000000010000
+c
+c
+c
+c
+c
+c
+
+l c.b.beq
+h c.b.bne
+/*bne $1, $3, 20*/
+set busIR 00010100001000110000000000010100
+c
+c
+c
+c
+c
+c
+
+l c.b.bne
+h c.b.blez
+/*blez $0, 16*/
+set busIR 00011000000000000000000000010000
+c
+c
+c
+c
+c
+c
+
+l c.b.blez
+h c.b.bzez
+/*bgez $1, 20*/
+set busIR 00000100001000010000000000010100
+c
+c
+c
+c
+c
+c
+
+l c.b.bgez
+h c.b.bltz
+/*bltz $15, 16*/
+set busIR 00000101111000000000000000010000
+c
+c
+c
+c
+c
+c
+
+l c.b.bltz
+h c.b.bgtz
+/*bgtz $1, 20*/
+set busIR 00011100001000000000000000010100
+c
+c
+c
+c
+c
+
+l c.b.bgtz
+h c.b.bltzal
+/*bltzal $15, 16*/
+set busIR 00000101111010100000000000010000
+c
+c
+c
+c
+c
+h c.write
+c
+l c.write
+c
+c
+
+l c.b.bltzal
+h c.b.bgezal
+/*bgezal $0, 20*/
+set busIR 00000100000010110000000000010100
+c
+c
+c
+c
+c
+h c.write
+c
+l c.write
+c
+c
+
+l c.b.bgezal
+h c.b.j
+/*j 16*/
+set busIR 00001000000000000000000000010000
+c
+c
+c
+c
+c
+c
+
+l c.b.j
+h c.b.jal
+/*jal 20*/
+set busIR 00001100000000000000000000010100
+c
+c
+c
+c
+c
+h c.write
+c
+l c.write
+c
+c
+
+l c.b.jal
+h c.b.jr
+/*jr $4*/
+set busIR 00000000100000000000000000010000
+c
+c
+c
+c
+c
+c
+
+l c.b.jr
+h c.b.jalr
+/*jalr $4, $5*/
+set busIR 00000000100000000010100000001001
+c
+c
+c
+c
+c
+h c.write
+c
+l c.write
+c

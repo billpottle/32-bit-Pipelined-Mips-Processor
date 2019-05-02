@@ -1,0 +1,317 @@
+vector CLOCK CLK _CLK
+clock CLOCK 01 10
+
+stepsize 300
+
+vector busPCtemp c.a.PCtemp.d[{31:0}]
+vector busPCtemp2 c.a.PCtemp2.d[{31:0}]
+vector busPCtemp3 c.a.PCtemp3.d[{31:0}]
+vector busPCbranch c.a.PCbranch.d[{31:0}]
+vector busPC4 c.a.PC4.d[{31:0}]
+vector busfour c.a.four.d[{31:0}]
+
+vector bustarget c.target.d[{31:0}]
+vector bustarget2 c.target2.d[{31:0}]
+
+vector busRS c.RS.d[{31:0}]
+vector busRT c.RT.d[{31:0}]
+vector busIMM c.IMM.d[{31:0}]
+
+vector busRS2 c.RS2.d[{31:0}]
+vector busRT2 c.RT2.d[{31:0}]
+vector busIMM2 c.IMM2.d[{31:0}]
+
+vector busAluresult c.Aluresult.d[{31:0}]
+vector busAluresult2 c.Aluresult2.d[{31:0}]
+vector busAluresult3 c.Aluresult3.d[{31:0}]
+
+vector busLW c.LW.d[{31:0}]
+
+vector busDataout c.Dataout.d[{31:0}]
+vector busDatain c.Datain.d[{31:0}]
+
+vector busPC c.PC.d[{31:0}]
+vector busPC1 c.PC1.d[{31:0}]
+vector busPC2 c.PC2.d[{31:0}]
+vector busPC3 c.PC3.d[{31:0}]
+vector busPC4 c.PC4.d[{31:0}]
+
+vector busIR c.IR.d[{31:0}]
+vector busIR1 c.IR1.d[{31:0}]
+vector busIR2 c.IR2.d[{31:0}]
+vector busIR3 c.IR3.d[{31:0}]
+vector busIR4 c.IR4.d[{31:0}]
+
+vector rw c.rw[{4:0}]
+vector rw2 c.rw2[{4:0}]
+vector rw3 c.rw3[{4:0}]
+vector rw4 c.rw4[{4:0}]
+
+
+//Don't forget to add DMC0,DMC0
+h Reset
+
+ana CLOCK busPC busIR 
+
+ana busIR1 busRS busRT busIMM bustarget c.write2
+ana busAluresult
+ana busRS2 busRT2 busDatain
+ana rw3 rw4
+
+l c.dobranch c.dojump c.1ext c.write c.alu
+
+l c.d.isimm
+
+l c.d.aluc.add c.d.aluc.sub c.d.aluc.and c.d.aluc.xor c.d.aluc.nor c.d.aluc.or c.d.aluc.slt c.d.aluc.sltu c.d.aluc.sra c.d.aluc.sll c.d.aluc.srl c.b.beq c.b.blez c.b.bgtz c.b.bltz c.b.bgez c.b.bltzal c.b.bgezal c.b.j c.b.jal c.b.jr c.b.jalr c.d.sllv c.d.srlv c.d.srav c.b.lui c.m.lb c.m.lbu c.m.lh c.m.lhu c.m.lw c.m.sb c.m.sh c.m.sw c.b.bne
+
+vector reg1 c.r.r[1].out[{31:0}]
+vector reg15 c.r.r[15].out[{31:0}]
+vector reg3 c.r.r[3].out[{31:0}]
+vector reg2 c.r.r[2].out[{31:0}]
+vector reg16 c.r.r[16].out[{31:0}]
+vector reg17 c.r.r[17].out[{31:0}]
+vector reg18 c.r.r[18].out[{31:0}]
+vector reg19 c.r.r[19].out[{31:0}]
+vector reg20 c.r.r[20].out[{31:0}]
+vector reg21 c.r.r[21].out[{31:0}]
+vector reg22 c.r.r[22].out[{31:0}]
+vector reg23 c.r.r[23].out[{31:0}]
+
+
+
+
+
+
+
+
+
+
+vector RW c.r.RW[{4:0}]
+
+ana reg3 reg15 reg2 reg1 RW reg16 reg17 reg18 reg19 reg20 reg21 reg22
+
+
+set bustarget %x00000000
+c
+c
+c
+c
+c
+l Reset
+!Load -1 into reg 15 and 3 into reg 3
+h c.write2
+set rw3 01111
+set busDatain %xffffffff
+c
+c
+c
+c
+c
+c
+c
+c
+set rw3 00011
+set busDatain %x00000003
+c
+c
+c
+c
+c
+c
+c
+c
+c
+x rw3
+x busDatain
+h c.alu
+l c.write2
+h c.d.aluc.add
+/*add $2, $3, $15*/
+set busIR 00000000011011110001000000100000
+c
+c
+c
+c
+c
+h c.write2
+c
+l c.write2
+c
+h c.alu
+x busDatain
+x rw3
+x c.write2
+c
+c
+c
+c
+c
+h c.write2
+c
+l c.write2
+c
+h c.d.aluc.add
+h c.d.isimm
+h c.1ext
+/*addi $1, $2, -1*/
+set busIR 00100000010000011111111111111111
+c
+c
+c
+c
+c
+h c.write2
+c
+l c.write2
+c
+l c.d.aluc.add
+h c.d.aluc.add
+l c.1ext
+/*addiu $3, $2, 1*/
+set busIR 00100100010000110000000000000001
+c
+c
+c
+c
+c
+c
+c
+l c.d.aluc.add
+h c.d.aluc.sub
+l c.d.isimm
+h c.1ext
+/*sub $2, $1, $15*/
+set busIR 00000000001011110001000000100010
+c
+c
+c
+h c.write2
+c
+l c.write2
+c
+h c.d.aluc.sub
+h c.d.aluc.sub
+l c.1ext
+/*subu $2, $3, $1*/
+set busIR 00000000011000010001000000100011
+c
+c
+c
+c
+c
+h c.write2
+c
+l c.write2
+c
+h c.write2
+set rw3 10000
+set busDatain %xdeadbeef
+c
+c
+c
+c
+c
+c
+l c.write2
+h c.alu
+h c.d.isimm
+h c.d.aluc.sll
+x busDatain
+/*sll $17 $16,4
+set busIR 00000000000100001000100100000000
+c
+c
+c
+c
+c
+h c.write2
+c
+c
+l c.write2
+c
+
+l c.d.aluc.sll
+h c.d.aluc.srl
+/* srl $18,$16,4
+set busIR 00000000000100001001000100000010
+c
+c
+c
+c
+c
+h c.write2
+c
+c
+l c.write2
+c
+l c.d.aluc.srl
+h c.d.aluc.sra
+/*sra $19,$16,4
+set busIR 00000000000100001001100100000011
+c
+c
+c
+h c.write2
+c
+c
+l c.write2
+c
+l c.d.aluc.sra
+l c.d.isimm
+
+
+h c.write2
+set rw3 00010
+set busDatain %x00000008
+c
+c
+c
+x rw3
+x busDatain
+l c.write2
+
+/* sllv $20,$16,$4
+h c.d.sllv
+l c.d.isimm
+h c.d.aluc.sll
+set busIR 00000000100100001010000000000100
+c
+c
+
+
+c
+h c.write2
+c
+c
+l c.write2
+c
+l c.d.sllv
+l c.d.aluc.sll
+h c.d.aluc.srl
+h c.d.srlv
+/* srlv $21,$16,$4
+set busIR 00000000100100001010100000000110
+c
+
+
+c
+c
+h c.write2
+c
+l c.write2
+c
+l c.d.srlv
+l c.d.aluc.srl
+h c.d.aluc.sra
+h c.d.srav
+set busIR 00000000100100001011000000000111
+c
+c
+
+
+c
+h c.write2
+c
+l c.write2
+c
+c
