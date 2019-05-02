@@ -25,7 +25,8 @@ The AddSub32 unit is responsible for adding and subtracting 32 bit numbers
 ![ALU AddSub32](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/ALU-addsub32.jpg)
 The AddSub32 unit uses 32 copies of AddSub
 ![AddSub](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/ALU-addsub.jpg)
-MEM Stage
-![MEM Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/MEM.jpg)
-WB Stage
-![WB Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/WB.jpg)
+The ALU also utilizes the Logic32 element, and single left and right shifts
+![logic32](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/ALU-logic32.jpg)
+Left Shifts and right shifts are used for mathematical operations. 
+![ALU-shiftleft](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/ALU-shiftleft.jpg)
+![ALU-shiftright](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/ALU-shiftright.jpg)
