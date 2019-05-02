@@ -17,3 +17,15 @@ MEM Stage
 ![MEM Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/MEM.jpg)
 WB Stage
 ![WB Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/WB.jpg)
+
+Much of the work happens inside the Arithmetic and Logic Unit (ALU). The ALU consists of several sub-sections, which are also used in other parts of the processor. 
+ALU Overview
+![ALU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/ALU.jpg)
+The AddSub32 unit is responsible for adding and subtracting 32 bit numbers
+![ALU AddSub32](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/ALU-addsub32.jpg)
+The AddSub32 unit uses 32 copies of AddSub
+![AddSub](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/ALU-addsub.jpg)
+MEM Stage
+![MEM Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/MEM.jpg)
+WB Stage
+![WB Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/WB.jpg)
