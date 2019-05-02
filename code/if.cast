@@ -1,0 +1,63 @@
+/*
+ * Cornell EE/CS 314, Spring 2000.
+ * 
+ */
+import "314/mips.cast";
+import "314/parts.cast";
+import "alu.cast";
+
+/* The instruction fetch signals
+ * 
+ * Define me!
+ */
+
+/* No instructions need to be decoded in IFctrl*/
+define IFctrl() (node dobranch2, dojump2)
+{
+}
+
+
+
+/* The Instruction Fetch
+ *
+ * Inputs: i - IF control signals
+ * Outputs: Iout - The instruction fetched
+ *          PC   - PC of the fetched instruction
+*/
+
+
+define IF() (Bus(32) PC, Iout, target; node[32] Iin, Iaddr; IFctrl i)
+{
+
+node carryout,carryout2, _Reset;
+Bus(32) PCtemp,PCtemp2,PCtemp3,PCbranch, PC4, four;
+
+
+
+/* Figure out if our PC is going to be the old PC or modified by a jump*/
+/*Make a bus equal to 4 to add to the old PC*/
+four.d[0]=GND;
+four.d[1]=GND;
+four.d[2]=Vdd;
+<z:3..31: four.d[z]=GND;>
+
+/*Add four to the old PC for the possible new PC*/
+Inv() (Reset, _Reset);
+AddSub32() as(PC,four,GND,GND,PC4,carryout);
+
+/*Add4 PC+4+target to store in temp bus for branch only*/
+AddSub32() as1(PC,target,GND,GND,PCbranch,carryout);
+
+/*Determine whether the new PC should be from PC+4, target (for jumps), or PCbranch for branches*/
+TBusMux2to1(32) (PC4,target,i.dojump2,PCtemp);
+TBusMux2to1(32) (PCtemp,PCbranch,i.dobranch2, PCtemp2);
+
+/*Check Reset*/
+<z:32: And2() (PCtemp2.d[z], _Reset, PCtemp3.d[z]); >
+
+/* Set the PC on the negative clock edge*/
+/*Now, read the instruction from the instruction memory*/
+<z:32: negFLOP() (PCtemp3.d[z],PC.d[z]);
+       Iaddr[z]=PC.d[z];
+       Iout.d[z]=Iin[z];>
+}

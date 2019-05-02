@@ -1,0 +1,214 @@
+/*-*-mode:c++-*-**********************************************************
+ *
+ *  Computer Systems Laboratory
+ *  Cornell University, Ithaca, NY 14853
+ *
+ *  EE/CS 314 Final Project, ALU
+ *
+ **************************************************************************
+ */
+import "314/parts.cast";
+import "314/mips.cast";
+import "myparts.cast";
+
+/*------------------------------------------------------------------------
+ *
+ *   ALU --
+ *
+ *    Combinational ALU.
+ *  
+ *   Inputs:
+ * 
+ *      a, b : 32-bit inputs
+ *         c : control input, selects operation
+ *
+ *   Output:
+ *
+ *        out: 32-bit output
+ *
+ *------------------------------------------------------------------------
+ */
+
+define AddSub() (node a, tempb, binvert, carryin; node out, carryout)
+{
+  node _a, b, _b, _tempb, _binvert, _carryin;
+  
+  Inv() (a, _a);
+  Inv() (tempb, _tempb);
+  Inv() (binvert, _binvert);
+  Inv() (carryin, _carryin);
+  
+  And2() c1(tempb,_binvert);
+  And2() c2(_tempb,binvert);
+  Or2() (c1.out,c2.out,b);
+
+  Inv() (b,_b);
+ 
+  And3() a1(a,_b,_carryin);
+  And3() a2(_a,b,_carryin);
+  And3() a3(_a,_b,carryin);
+  And3() a4(a,b,carryin);
+  Or4() (a1.out,a2.out,a3.out,a4.out,out);
+
+  And2() b1(a,carryin);
+  And2() b2(b,carryin);
+  And2() b3(a,b);
+  Or3() (b1.out,b2.out,b3.out,carryout);
+}
+
+/*define ALU1() (node a, b, carryin; ALUctrl op; node result, carryout)
+{
+   node x, _a, _b, carryoutadd, carryoutsub, _carryin;
+
+   node[6] tempop;
+
+   Inv() (a, _a);
+   Inv() (b, _b);
+   Inv() (carryin, _carryin);
+
+   AddSub() (a,b,carryin,tempop[0],carryoutadd);
+   And2() (a,b,tempop[1]);
+   Xor2() (a,b,tempop[2]);
+   Or2() (a,b,tempop[3]);
+   Nor2() (a,b,tempop[4]);
+   AddSub() (a,_b,_carryin,tempop[5],carryoutsub);
+
+   And2() z1(tempop[0],op.add);
+   And2() z2(tempop[1],op.and);
+   And2() z3(tempop[2],op.xor);
+   And2() z4(tempop[3],op.or);
+   And2() z5(tempop[4],op.nor);
+   And2() z6(tempop[5],op.sub);
+
+   Or3() z7(z1.out,z2.out,z3.out);
+   Or3() z8(z4.out,z5.out,z6.out);
+   Or2() (z7.out,z8.out,result);
+
+   And2() a1(carryoutadd,op.add);
+   And2() a2(carryoutsub,op.sub);
+   Or2() (a1.out,a2.out,carryout);
+
+}
+*/
+
+define ShiftLeft() (Bus(32) a; node[5] c; Bus(32) out)
+{
+   Bus(32) sf1out,sf2out,sf4out,sf8out,sf1in,sf2in,sf4in,sf8in,sf16in;
+
+   <i:31: Or2() (a.d[i],GND,sf1in.d[i+1]);>
+   
+   Or2() (GND,GND,sf1in.d[0]);
+   BusMux32() (sf1in,a,c.d[0],sf1out);
+
+   <i:30: Or2() (sf1out.d[i],GND,sf2in.d[i+2]);>
+
+   Or2() (GND,GND,sf2in.d[0]);
+   Or2() (GND,GND,sf2in.d[1]);
+   BusMux32() (sf2in,sf1out,c.d[1],sf2out);
+
+   <i:28: Or2() (sf2out.d[i],GND,sf4in.d[i+4]);
+   <i:4: Or2() (GND,GND,sf4in.d[i]);
+   
+   BusMux32() (sf4in,sf2out,c.d[2],sf4out);
+
+   <i:24: Or2() (sf4out.d[i],GND,sf8in.d[i+8]);
+   <i:8: Or2() (GND,GND,sf8in.d[i]);
+   
+   BusMux32() (sf8in,sf4out,c.d[3],sf8out);
+
+   <i:16: Or2() (sf8out.d[i],GND,sf16in.d[i+16]);
+   <i:16: Or2() (GND,GND,sf16in.d[i]);
+   
+   BusMux32() (sf16in,sf8out,c.d[4],out);
+   
+}
+
+define ShiftRight() (Bus(32) a; node arith; node[5] c; Bus(32) out)
+{
+   Bus(32) sf1out,sf2out,sf4out,sf8out,sf1in,sf2in,sf4in,sf8in,sf16in;
+
+   node pad;
+
+   And2() (arith, a.d[31], pad);
+
+   <i:31: Or2() (a.d[i+1],GND,sf1in.d[i]);
+
+   Or2() (pad,pad,sf1in.d[31]);
+   BusMux32() (sf1in,a,c.d[0],sf1out);
+
+   <i:30: Or2() (sf1out.d[i+2],GND,sf2in.d[i]);>
+
+   Or2() (pad,pad,sf2in.d[31]);
+   Or2() (pad,pad,sf2in.d[30]);
+   BusMux32() (sf2in,sf1out,c.d[1],sf2out);
+
+   <i:28: Or2() (sf2out.d[i+4],GND,sf4in.d[i]);
+   <i:4: Or2() (pad,pad,sf4in.d[i]);
+   
+   BusMux32() (sf4in,sf2out,c.d[2],sf4out);
+
+   <i:24: Or2() (sf4out.d[i+8],GND,sf8in.d[i]);
+   <i:8: Or2() (pad,pad,sf8in.d[i]);
+   
+   BusMux32() (sf8in,sf4out,c.d[3],sf8out);
+
+   <i:16: Or2() (sf8out.d[i+16],GND,sf16in.d[i]);
+   <i:16: Or2() (pad,pad,sf16in.d[i]);
+   
+   BusMux32() (sf16in,sf8out,c.d[4],out);
+}
+
+define select() (Bus(32) add1, and1, xor1, or1, nor1, sub1, sltu1, slt1, sra1, srl1, sll1; ALUctrl c; Bus(32) out)
+{
+   Bus(32) addbus, subbus, andbus, xorbus, orbus, norbus, subbus, sllbus, srabus, srlbus, sltbus, sltubus;
+
+   <i:32: 
+        And2() (add1.d[i],c.add,addbus.d[i]);
+	And2() (sub1.d[i],c.sub,subbus.d[i]);
+        And2() (xor1.d[i],c.xor,xorbus.d[i]);
+        And2() (or1.d[i],c.or,orbus.d[i]);
+        And2() (nor1.d[i],c.nor,norbus.d[i]);
+        And2() (and1.d[i],c.and,andbus.d[i]);
+        And2() (sltu1.d[i],c.sltu,sltubus.d[i]);
+        And2() (slt1.d[i],c.slt,sltbus.d[i]);
+        And2() (sra1.d[i],c.sra,srabus.d[i]);
+        And2() (srl1.d[i],c.srl,srlbus.d[i]);
+        And2() (sll1.d[i],c.sll,sllbus.d[i]);
+
+        Or4() a1(addbus.d[i],subbus.d[i],sltubus.d[i],sltbus.d[i]);
+        Or4() a2(orbus.d[i],xorbus.d[i],norbus.d[i],andbus.d[i]);
+        Or3() a3(srlbus.d[i],sllbus.d[i],srabus.d[i]);
+        Or3() (a1.out,a2.out,a3.out,out.d[i]);
+   >
+}
+
+define invert() (Bus(32) a; Bus(32) out;)      
+ 
+define ALU() (Bus(32) a, b; ALUctrl c; Bus(32) out)
+{
+   node carryadd, carrysub, binvert;
+   Bus(32) temp, addbus, subbus, andbus, xorbus, orbus, norbus, subbus, sllbus, srabus, srlbus, sltbus, sltubus;  
+
+   And2() (GND,Vdd,carryadd); 
+   
+   Inv() (carryadd, carrysub);
+  
+   Or2() (GND,Vdd,Binvert);
+
+   <i:32: AddSub() (a.d[i],b.d[i],GND,temp.d[i-1],addbus.d[i],temp.d[i]);
+          AddSub() (a.d[i],b.d[i],Vdd,carrysub,subbus.d[i],carrysub);>
+   
+   <i:32:
+          And2() (a.d[i],b.d[i],andbus.d[i]);
+          Xor2() (a.d[i],b.d[i],xorbus.d[i]);
+          Or2() (a.d[i],b.d[i],orbus.d[i]);
+          Nor2() (a.d[i],b.d[i],norbus.d[i]);>
+
+   ShiftLeft() (b,c.sa,sllbus);
+   ShiftRight() (b,c.sra,c.sa,srabus);
+   ShiftRight() (b,c.srl,GND,srlbus);
+
+   Select() (addbus, andbus, xorbus, orbus, norbus, subbus, sltubus, sltbus, srabus, srlbus, sllbus,c,out);
+
+}
+

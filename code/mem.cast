@@ -1,0 +1,160 @@
+/*
+ * Cornell EE/CS 314, Spring 2000.
+ * 
+ */
+
+/* Mem phase control signals
+ *
+ * Define me!
+ *
+ */
+define MEMctrl() (Bus(32) Irr; node DMC0,DMC1, lb, lh, lw, lbu, lhu, sb, sh, sw; node[5] rw2,rw2out) 
+{
+Bus(32) _Irr;
+node load, store, lsa, bite, half, word;
+
+/*Decode load and store operations here from Instruction.*/
+
+
+<i:32: Inv() (Irr.d[i],_Irr.d[i]);>
+
+/*Opcode for Load/Store = 10xxxx*/
+And2() (Irr.d[31], _Irr.d[30],lsa);
+
+/*Opcode for store = 1010xx*/
+And3() (lsa, Irr.d[29], _Irr.d[28], store);
+
+/*Opcode for load = 100xxx*/
+And2() (lsa, _Irr.d[29], load);
+
+/*Opcode for load/store bite = xxxx00*/
+And2() (_Irr.d[27], _Irr.d[26], bite);
+
+/*Opcode for half = xxxx01*/
+And2() (_Irr.d[27], Irr.d[26], half);
+
+/*Opcode for word = xxxx11*/
+And2() (Irr.d[27], Irr.d[26], word);
+/*lb*/
+And3() (load, bite, _Irr.d[28], lb);
+
+/*lh*/
+And3() (load, half, _Irr.d[28], lh);
+
+/*lw*/
+And3() (load, word, _Irr.d[28], lw);
+
+/*lbu*/
+And3() (load, bite, Irr.d[28], lbu);
+
+/*lhu*/
+And3() (load, half, Irr.d[28], lhu);
+
+/*sb*/
+And2() (store, bite, sb);
+
+/*sh*/
+And2() (store, half, sh);
+
+/*sw*/
+And2() (store, word, sw);
+node memop;
+Or6() oa(lb,lh,lw,lbu,lhu,sb);
+Or3() ob(sh, sw,oa.out,memop);
+
+/*determine register for load/stores*/
+node[5] memrw;
+
+And2() (memop,Irr.d[16],memrw[0]);
+And2() (memop,Irr.d[17],memrw[1]);
+And2() (memop, Irr.d[18],memrw[2]);
+And2() (memop, Irr.d[19],memrw[3]);
+And2() (memop,Irr.d[20],memrw[4]);
+
+TMux2to1(5) (rw2,memrw,memop, rw2out);
+
+
+ }
+
+/* The Mem phase
+ *
+ * Read or write bytes/halfwords/words to memory.
+ *
+ * Inputs: din - data to be written to memory
+ *         daddr - memory address to access
+ *         MEMctrl - memory control signals
+ *
+ * Outputs:
+ *         dout - data read from memory
+ *    
+ */
+define MEM() (Bus(32) I,  din, dout, daddr; node[32] Din1,Dout1,Daddr1; MEMctrl m)
+{
+
+Bus(32) douttemp, douttemp2, douttemp3, douttemp4, douttemp5, douttemp6,douttemp7;
+node isload,_isload, isstore, _isstore, DMC0temp, DMC1temp;
+
+
+
+
+
+/*read word from memory*/
+<i:32: Din1[i]=douttemp.d[i];>
+
+/*write word to memory*/
+<i:32: din.d[i]=Dout1[i];>
+
+/*Set memory address we're talking about*/
+<i:32: daddr.d[i]=Daddr1[i];>
+
+node temp;
+/*see if it is a load or a store*/
+Or4() (m.lb, m.lbu,m.lw, m.lh,temp);
+Or2() (m.lhu,temp,isload);
+Inv() (isload, _isload);
+
+
+Or3() (m.sb,m.sw,m.sh,isstore);
+
+
+/*load byte*/
+<i:8: And2() (m.lb, douttemp.d[i], douttemp2.d[i]);>
+/*see whether or not to sign extend*/
+<i:8..31: And2() (m.lb,douttemp.d[7],douttemp2.d[i]);>
+
+/*load byte unsigned*/
+<i:8: And2() (m.lbu, douttemp.d[i], douttemp3.d[i]);>
+/*do not sign extend*/
+<i:8..31: GND=douttemp3.d[i];>
+
+/*load halfword*/
+<i:16: And2() (m.lh, douttemp.d[i], douttemp4.d[i]);>
+/*see whether or not to sign extend*/
+<i:8..31: And2() (m.lh,douttemp.d[15],douttemp4.d[i]);>
+
+/*load halfword unsigned*/
+<i:16: And2() (m.lhu, douttemp.d[i], douttemp5.d[i]);>
+/*do not sign extend*/
+<i:16..31: GND=douttemp5.d[i];>
+
+/*load word*/
+<i:32: And2() (m.lw, douttemp.d[i], douttemp6.d[i]);>
+
+<i:32: Or4() (douttemp2.d[i],douttemp3.d[i],douttemp4.d[i],douttemp5.d[i],douttemp7.d[i]);>
+<i:32: Or3() (douttemp7.d[i],douttemp5.d[i],douttemp6.d[i],dout.d[i]);>
+
+
+
+/*temp memory controls for store*/
+node dmc0t,dmc1t;
+Inv() (m.sb,dmc0t);
+Inv() (m.sh,dmc1t);
+
+
+/*Set DMCO, DMC1 to appropriate values. This will cause the correct values to be written to memory*/
+And3() (_isload,isstore,dmc0t,DMC0temp);
+And3() (_isload,isstore,dmc1t,DMC1temp);
+
+memIF() (DMC0temp, DMC1temp, m.DMC0, m.DMC1);
+
+}

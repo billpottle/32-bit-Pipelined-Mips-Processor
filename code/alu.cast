@@ -1,0 +1,285 @@
+/*-*-mode:c++-*-**********************************************************
+ *
+ *  Computer Systems Laboratory
+ *  Cornell University, Ithaca, NY 14853
+ *
+ *  EE/CS 314 Final Project, ALU
+ *
+ **************************************************************************
+ */
+import "314/parts.cast";
+import "314/mips.cast";
+import "myparts.cast";
+
+/*------------------------------------------------------------------------
+ *
+ *   ALU --
+ *
+ *    Combinational ALU.
+ *  
+ *   Inputs:
+ * 
+ *      a, b : 32-bit inputs
+ *         c : control input, selects operation
+ *
+ *   Output:
+ *
+ *        out: 32-bit output
+ *
+ *------------------------------------------------------------------------
+ */
+
+
+     
+define AddSub() (node a, tempb, binvert, carryin; node out, carryout)
+{
+
+/*The main add/subtraction subunit that implements 1 bit addition or subtraction. */
+/*Takes as inputs the two bits a and b, the binvert bit which is set on subtraction*/
+/*the carryin and carryout bits, and the output bit.*/
+
+  node _a, b, _b, _tempb, _binvert, _carryin;
+  
+  Inv() (a, _a);
+  Inv() (tempb, _tempb);
+  Inv() (binvert, _binvert);
+  Inv() (carryin, _carryin);
+  
+  And2() c1(tempb,_binvert);
+  And2() c2(_tempb,binvert);
+  Or2() (c1.out,c2.out,b);
+
+  Inv() (b,_b);
+ 
+  And3() a1(a,_b,_carryin);
+  And3() a2(_a,b,_carryin);
+  And3() a3(_a,_b,carryin);
+  And3() a4(a,b,carryin);
+  Or4() (a1.out,a2.out,a3.out,a4.out,out);
+
+  And2() b1(a,carryin);
+  And2() b2(b,carryin);
+  And2() b3(a,b);
+  Or3() (b1.out,b2.out,b3.out,carryout);
+}
+
+
+define AddSub32() (Bus(32) a, b; node Bnegate, carryintemp; Bus(32) out; node carryout)
+{
+ AddSub[32] f; 
+ <i:32: 
+      f[i].a=a.d[i];
+      f[i].tempb=b.d[i];
+      f[i].out=out.d[i];
+      f[i].binvert=Bnegate;
+ >
+f[31].carryout=carryout;
+ <i:31:
+      f[i].carryout=f[i+1].carryin;>
+
+ f[0].carryin = carryintemp;
+}
+
+define ShiftLeft() (Bus(32) a; node[5] c; Bus(32) out)
+{
+
+/* Module that implements sll, the left logical shift. This gate performs a binary shift */
+/* and takes as inputs the 32 bit bus to be shifted a, the 5 bit array of nodes telling the shift amount*/
+/* c, and gives the shifted 32 bit bus out as output.*/
+
+   Bus(32) sf1out,sf2out,sf4out,sf8out,sf1in,sf2in,sf4in,sf8in,sf16in;
+
+   <i:31: Or2() (a.d[i],GND,sf1in.d[i+1]);>
+   
+   Or2() (GND,GND,sf1in.d[0]);
+   BusMux32() (a,sf1in,c[0],sf1out);
+
+   <i:30: Or2() (sf1out.d[i],GND,sf2in.d[i+2]);>
+
+   GND=sf2in.d[0];
+   GND=sf2in.d[1];
+   BusMux32() (sf1out,sf2in,c[1],sf2out);
+
+   <i:28: Or2() (sf2out.d[i],GND,sf4in.d[i+4]);>
+   <i:4: GND=sf4in.d[i];>
+   
+   BusMux32() (sf2out,sf4in,c[2],sf4out);
+
+   <i:24: Or2() (sf4out.d[i],GND,sf8in.d[i+8]);>
+   <i:8: GND=sf8in.d[i];>
+   
+   BusMux32() (sf4out,sf8in,c[3],sf8out);
+
+   <i:16: Or2() (sf8out.d[i],GND,sf16in.d[i+16]);>
+   <i:16: GND=sf16in.d[i];>
+   
+   BusMux32() (sf8out,sf16in,c[4],out);
+}   
+
+
+define ShiftRight() (Bus(32) a; node arith; node[5] c; Bus(32) out)
+{
+/* Module that implements srl and sra, the right logical shift and right arithmetic shift. This gate performs a binary shift and takes as inputs the 32 bit bus to be shifted a, the 5 bit array of nodes telling the shift amount c, and the node arith which is set for arithmetic shifts, and gives the shifted 32 bit bus out as output.*/
+
+   Bus(32) sf1out,sf2out,sf4out,sf8out,sf1in,sf2in,sf4in,sf8in,sf16in;
+
+   node pad;
+
+   And2() (arith, a.d[31], pad);
+
+   <i:31: Or2() (a.d[i+1],GND,sf1in.d[i]);>
+
+   pad=sf1in.d[31];
+   BusMux32() (a,sf1in,c[0],sf1out); 
+
+   <i:30: Or2() (sf1out.d[i+2],GND,sf2in.d[i]);>
+
+   pad=sf2in.d[31];
+   pad=sf2in.d[30];
+   BusMux32() (sf1out,sf2in,c[1],sf2out);
+
+   <i:28: Or2() (sf2out.d[i+4],GND,sf4in.d[i]);>
+   
+   pad=sf4in.d[31];
+   pad=sf4in.d[30];
+   pad=sf4in.d[29];
+   pad=sf4in.d[28];
+   BusMux32() (sf2out,sf4in,c[2],sf4out);
+
+   <i:24: Or2() (sf4out.d[i+8],GND,sf8in.d[i]);>
+   pad=sf8in.d[31];
+   pad=sf8in.d[30];
+   pad=sf8in.d[29];
+   pad=sf8in.d[28];
+   pad=sf8in.d[27];
+   pad=sf8in.d[26];
+   pad=sf8in.d[25];
+   pad=sf8in.d[24];
+   BusMux32() (sf4out,sf8in,c[3],sf8out);
+
+   <i:16: Or2() (sf8out.d[i+16],GND,sf16in.d[i]);>
+  
+   pad=sf16in.d[31];
+   pad=sf16in.d[30];
+   pad=sf16in.d[29];
+   pad=sf16in.d[28];
+   pad=sf16in.d[27];
+   pad=sf16in.d[26];
+   pad=sf16in.d[25];
+   pad=sf16in.d[24];
+   pad=sf16in.d[23];
+   pad=sf16in.d[22];
+   pad=sf16in.d[21];
+   pad=sf16in.d[20];
+   pad=sf16in.d[19];
+   pad=sf16in.d[18];
+   pad=sf16in.d[17];
+   pad=sf16in.d[16];
+   BusMux32() (sf8out,sf16in,c[4],out);
+}
+
+
+
+define Slt() (node msb; Bus(32) slt2)
+{
+
+/* Gate to implement set on less than. If a slt is indicated, and the msb of the signed subtraction is set, 
+then bi 0 of the result should be set. Otherwise, it should be low. Regradless, the last 31 bits should be low.*/
+
+And2() (Vdd, msb, slt2.d[0]);
+<i:1 .. 31: Inv() (Vdd, slt2.d[i]); >
+}
+ 
+define Sltu() (node carryout; Bus(32) sltu2)
+{
+node _carryout;
+     Inv() (carryout,_carryout);
+     And2() (Vdd, _carryout, sltu2.d[0]);
+     <i:1 .. 31: Inv() (Vdd, sltu2.d[i]); >
+}
+
+define Logic32() (Bus(32) a, b; Bus(32) andbus, xorbus, orbus, norbus)
+{
+  <i:32:
+          And2() (a.d[i],b.d[i], andbus.d[i]);
+          Xor2() (a.d[i],b.d[i], xorbus.d[i]);
+          Or2() (a.d[i],b.d[i], orbus.d[i]);
+          Nor2() (a.d[i],b.d[i], norbus.d[i]);
+  >	
+}
+
+define ALU() (Bus(32) a, b; ALUctrl c; Bus(32) out)
+{	
+
+/*The main ALU definition, which instantiates the gates defined earlier.*/
+
+ 
+   node carryadd, carrysub, binvert, Bnegate, carryout;
+   Bus(32) temp, addsubbus, andbus, xorbus, orbus, norbus, sllbus, srabus, srlbus, sltbus, sltubus,  t1,t2, t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14;
+
+   
+   Or3() (c.sub, c.slt, c.sltu, Bnegate);
+node _arith;	  
+/* Bnegate is set whenever we want to do a subtraction */
+		
+AddSub32() 32ADDER(a,b,Bnegate,Bnegate,addsubbus,carryout);
+   
+   Sltu() (32ADDER.carryout, sltubus);
+   Slt()  (addsubbus.d[31],  sltbus);	
+   ShiftLeft() (b,c.sa,sllbus);
+   ShiftRight() (b,c.sra,c.sa,srabus);
+   Inv() (c.srl, _arith);
+   ShiftRight() (b,_arith,c.sa,srlbus);
+ 
+Logic32() (a,b,andbus, xorbus, orbus, norbus);
+
+ <i:32:
+	And2() (c.and,andbus.d[i],t1.d[i]);
+	And2() (c.or, orbus.d[i],t2.d[i]);
+	And2() (c.nor,norbus.d[i],t3.d[i]);
+	And2() (c.xor,xorbus.d[i],t4.d[i]);
+        And2() (c.add,addsubbus.d[i],t5.d[i]);
+	And2() (c.sub,addsubbus.d[i],t6.d[i]);
+	And2() (c.slt,sltbus.d[i],t7.d[i]);
+	And2() (c.sltu,sltubus.d[i],t8.d[i]);
+	And2() (c.srl,srlbus.d[i],t9.d[i]);
+	And2() (c.sra,srabus.d[i],t10.d[i]);
+	And2() (c.sll,sllbus.d[i],t11.d[i]);
+	Or4() (t1.d[i],t2.d[i],t3.d[i],t4.d[i],t12.d[i]);
+	Or4() (t5.d[i],t11.d[i],t7.d[i],t12.d[i],t13.d[i]);
+	Or4() (t8.d[i],t9.d[i],t10.d[i],t13.d[i],t14.d[i]);
+	Or2() (t6.d[i],t14.d[i],out.d[i]);
+>
+
+}
+
+/*determines whether two 32-bit buses are equal*/
+define compare() (Bus(32) a,b; node equal,lessthan,greaterthan)
+{
+  Bus(32) xortemp, addsub, temp;
+  node _equal, carryout, lessthantemp;
+
+  <i:32: Xor2() (a.d[i],b.d[i],xortemp.d[i]);>
+  <i:32: Inv() (xortemp.d[i],temp.d[i]); >
+
+  And16() t1(temp.d[0],temp.d[1],temp.d[2],temp.d[3],temp.d[4],temp.d[5],
+         temp.d[6],temp.d[7],temp.d[8],temp.d[9],temp.d[10],temp.d[11],
+         temp.d[12],temp.d[13],temp.d[14],temp.d[15]);
+
+  And16() t2(temp.d[16],temp.d[17],temp.d[18],temp.d[19],temp.d[20],temp.d[21],
+        temp.d[22],temp.d[23],temp.d[24],temp.d[25],temp.d[26],temp.d[27],
+        temp.d[28],temp.d[29],temp.d[30],temp.d[31]);
+
+ And2() (t1.out,t2.out,equal);
+ Inv() (equal, _equal);
+
+node greaterthantemp;
+
+ AddSub32() (a,b,Vdd,Vdd,addsub,carryout);
+Inv() (addsub.d[31],greaterthantemp);
+ And3() (greaterthantemp,Vdd,_equal,greaterthan);
+ Inv() (greaterthan,lessthantemp);
+ And2() (lessthantemp,_equal,lessthan);
+
+ 
+}

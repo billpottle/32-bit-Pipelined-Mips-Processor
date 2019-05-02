@@ -1,0 +1,189 @@
+lpr -/*
+ * Cornell EE/CS 314, Spring 2000.
+ * 
+ */
+import "314/mips.cast";
+import "314/parts.cast";
+import "myparts.cast";
+
+
+/* Execute phase control signals
+ * 
+ * Define me!
+ */
+define EXctrl() (Bus(32) Irr;node lb, lh, lw, lbu, lhu, sb, sh, sw, sllv, srav, srlv,isimm; ALUctrl aluc)
+{
+node store, load, lsa, bite, half, word, var, nv, left, right, shift, arith, logic
+Bus(32) _Irr
+
+<i:32: Inv() (Irr.d[i],_Irr.d[i]);>
+
+/*Opcode for Load/Store = 10xxxx*/
+And2() (Irr.d[31], _Irr.d[30],lsa);
+
+/*Opcode for store = 1010xx*/
+And3() (lsa, Irr.d[29], _Irr.d[28], store);
+
+/*Opcode for load = 100xxx*/
+And2() (lsa, _Irr.d[29], load);
+
+/*Opcode for load/store bite = xxxx00*/
+And2() (_Irr.d[27], _Irr.d[26], bite);
+
+/*Opcode for half = xxxx01*/
+And2() (_Irr.d[27], Irr.d[26], half);
+
+/*Opcode for word = xxxx11*/
+And2() (Irr.d[27], Irr.d[26], word);
+
+/*Function field for shift = 000xxx*/
+And3() (_Irr.d[5], _Irr.d[4], _Irr.d[3], shift);
+
+/*Function field for arith = 010xxx*/
+And3() (_Irr.d[5], Irr.d[4], _Irr.d[3], arith);
+
+/*Function field for logic  = 011xxx*/
+And3() (_Irr.d[5], Irr.d[4], Irr.d[3], Logic);
+
+And2() (_Irr.d[1], _Irr.d[0]);
+var=Irr.d[2];
+nv=_Irr.d[2];
+right=Irr.d[1];
+
+/*lb*/
+And3() (load, bite, _Irr.d[28], lb);
+
+/*lh*/
+And3() (load, half, _Irr.d[28], lh);
+
+/*lw*/
+And3() (load, word, _Irr.d[28], lw);
+
+/*lbu*/
+And3() (load, bite, Irr.d[28], lbu);
+
+/*lhu*/
+And3() (load, half, Irr.d[28], lhu);
+
+/*sb*/
+And2() (store, bite, sb);
+
+/*sh*/
+And2() (store, half, sh);
+
+/*sw*/
+And2() (store, word, sw);
+
+/*sll*/
+And3() (shift, nv, left, aluc.sll);
+
+/*srl*/
+And4() (shift, nv, right, _Irr.d[0], aluc.srl);
+
+/*sra*/
+And4() (shift, nv, right, Irr.d[0], aluc.sra);
+
+/*sllv*/
+And3() (shift, var, left, sllv);
+
+/*srlv*/
+And4() (shift, var, right, _Irr.d[0], srlv);
+
+/*srav*/
+And4() (shift, var, right, Irr.d[0], srav);
+
+/*add*/
+And3() (arith, _Irr.d[1], _Irr.d[0], aluc.add);
+
+/*addu*/
+And3() (arith, _Irr.d[1], Irr.d[0], aluc.addu);
+
+/*sub*/
+And3() (arith, Irr.d[1], _Irr.d[0], aluc.sub);
+
+/*subu*/
+And3() (arith, Irr.d[1], Irr.d[0], aluc.subu);
+
+/*and*/
+And3() (logic, _Irr.d[1], _Irr.d[0], aluc.and);
+
+/*or*/
+And3() (logic, _Irr.d[1], Irr.d[0], aluc.or);
+
+/*xor*/
+And3() (logic, Irr.d[1], _Irr.d[0], aluc.xor);
+
+/*nor*/
+And3() (logic, Irr.d[1], Irr.d[0], aluc.and);
+
+/*Control Note: alu operations with immediate can be specified in the ALUctrl, with only an extra bit in EX being set if the instruction is to be performed with an immediate*/
+/*Now set isimm for when the instruction should send an immediate to the Alu*/
+/*isimm=true for andi, addi, addiu, ori, xori, slti, sltiu. 1ext is decoded in rd.cast and so the immediate that comes through is the correct one.*/
+
+And3() (_Irr.d[31],_Irr.d[30],Irr.d[29],isimm);
+
+
+
+
+
+}
+
+
+
+/* The Execute phase
+ *
+ * Inputs: I      - Stage 3 Instruction
+ *         RSbus  - Value of RS register
+ *         RTbus  - Value of RT register
+ *         Immbus - Value of Immediate field, sign-extended
+ *
+ * Outputs: e - execute phase control signals
+ *          c - control signals to ALU
+ */
+
+/*for ours, c is an input*/
+
+define EX()(Bus(32) I, RSbus, RTbus, Immbus, Aluresult;
+	    EXctrl e; node[5] rw)
+{
+node  carryout, lui, varshift;
+ Bus(32) aluin;
+node[5] sftemp1, sftemp2, sftemp3;
+
+
+
+/*Implement instruction decoding for Shift amount*/
+<i:5: I.d[i+6]=sftemp1[i];>
+/*shift amount= rs & 0x1f for variable shifts*/
+<i:5: RSbus.d[i]=sftemp2[i];>
+
+
+/*set shift to be decoded value or value in reg (for variable shift)*/
+Or3() (e.sllv, e.srlv, e.srav,varshift);
+<i:5: And2() (sftemp2[i],varshift,sftemp3[i]);>
+<i:5: Or2() (sftemp3[i], sftemp1[i], e.aluc.sa[i]);>
+
+/*Set rw, the destination register number that will be written back in the wb stage. set rw to rt for an I format instruction, set rw at rd for an r format instruction*/
+
+node _isimm;
+node[5] rwtemp, rwtemp2,rd,rt;
+
+<i:16..20: rt[i-16]=I.d[i];>
+<i:11..15: rd[i-11]=I.d[i];>
+
+
+Inv() (e.isimm,_isimm);
+<i:5: And2() (rt[i],isimm,rwtemp[i]);>
+<i:5: And2() (rd[i],_isimm,rwtemp2[i]);>
+<i:5: Or2() (rwtemp[i],rwtemp2[i],rw[i]);>
+
+/*Decide whether the alu is taking in an immediate or Register*/
+
+
+   TBusMux2to1(32) (RTbus,Immbus,e.isimm,aluin);
+   ALU() lua(RSbus,aluin,e.aluc,Aluresult);
+
+
+
+}
+

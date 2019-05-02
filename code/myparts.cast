@@ -1,0 +1,161 @@
+/* 
+ *  Cornell EE/CS 314
+ *
+ */
+import "314/parts.cast";
+
+
+/* --- YOUR PART DEFINITIONS GO HERE --- */
+
+/* define AND gate */
+define And2() (node a, b; node out)
+{
+  node x;
+
+  Nand2() (a,b,x);
+  Inv() (x,out);
+}
+
+define Or2() (node a, b, out)
+{
+  node x;
+
+  Nor2() (a,b,x);
+  Inv() (x,out);
+}
+
+define Xor2() (node a, b, out)
+{
+  node _a, _b;
+
+  Inv() (a, _a);
+  Inv() (b, _b);
+
+  And2 a1(a,_b);
+  And2 a2(_a,b);
+
+  Or2() (a1.out, a2.out, out);
+}
+
+
+define And3() (node a, b, c; node out)
+{
+  node x;
+
+  And2() (a,b,x);
+  And2() (x,c,out);
+}
+
+define And4() (node a, b, c, d; node out)
+{
+  node x;
+
+  And3() (a,b,c,x);
+  And2() (x,d,out);
+}
+
+define And5() (node a, b, c, d, e; node out)
+{
+  node x;
+
+  And3() (a,b,c,x);
+  And3() (x,d,e,out);
+}
+
+define And6() (node a, b, c, d, e, f; node out)
+{
+  node x;
+
+  And3() (a,b,c,x);
+  And4() (x,d,e,f,out);
+}
+
+define And16() (node a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p; node out)
+{
+
+  And4() y1(a,b,c,d);
+  And4() y2(e,f,g,h);
+  And4() y3(i,j,k,l);
+  And4() y4(m,n,o,p);
+  And4() (y1.out,y2.out,y3.out,y4.out,out);
+}
+
+define Or3() (node a, b, c; node out)
+{
+  node x;
+
+  Or2() (a,b,x);
+  Or2() (x,c,out);
+}
+
+define Or4() (node a, b, c, d; node out)
+{
+  node x;
+
+  Or3() (a,b,c,x);
+  Or2() (x,d,out);
+}
+
+define Or5() (node a, b, c, d, e; node out)
+{
+  node x;
+
+  Or3() (a,b,c,x);
+  Or3() (x,d,e,out);
+}
+
+define Or6() (node a,b,c,d,e,f; node out)
+{
+node x;
+	Or4() (a,b,c,d,x);
+	Or3() (e,f,x,out);
+}
+define Or16() (node a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p; node out)
+{
+
+  Or4() x1(a,b,c,d);
+  Or4() x2(e,f,g,h);
+  Or4() x3(i,j,k,l);
+  Or4() x4(m,n,o,p);
+  Or4() (x1.out,x2.out,x3.out,x4.out,out);
+}
+
+
+/* define Mux gate with one 1-bit select line,  two 1-bit inputs, and returns one 1-bit output */
+define Mux() (node b, c, select; node  out)
+{
+ node x, y, _select;
+
+ Inv() (select, _select);
+
+ And2() (_select, b, x);
+ And2() (select, c, y);
+ Or2() (x, y, out);
+}
+
+/*define BusMux32 gate with one 1-bit select line,  two 32-bit inputs, and returns one 32-bit output */
+define BusMux32() (Bus(32) in0, in1; node select; Bus(32) out)
+{
+ 
+ <i:32: Mux() (in0.d[i], in1.d[i], select, out.d[i]);>
+}
+
+
+define shiftleft2() (Bus(32) a; Bus(32) out)
+{
+/*Shifts busa left by two and gives this as bus out*/
+   Or2() (GND,GND,out.d[0]);
+   Or2() (GND,GND,out.d[1]);
+   <i:30: a.d[i]=out.d[i+2];>
+}
+
+
+/*
+ * negBusFlop
+ *    An array of posflops, used to flop in a bus value
+ *
+ */
+define negBusFLOP(int N) (Bus(N) in, out)
+{
+  <i:N: negFLOP() (in.d[i],out.d[i]);>
+}

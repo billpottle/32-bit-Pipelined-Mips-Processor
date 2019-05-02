@@ -1,0 +1,147 @@
+/*
+ * Cornell EE/CS 314, Spring 2000.
+ * 
+ */
+import "314/mips.cast";
+import "314/parts.cast";
+import "314/cpuparts.cast";
+import "314/rf.cast";
+import "314/memIF.cast";
+
+
+/*-- mips datapath blocks --*/
+import "if.cast";
+import "rd.cast";
+import "ex.cast";
+import "mem.cast";
+import "wb.cast";
+
+import "alu.cast"; // project 4a ALU
+
+/* 
+ * The main CPU
+ *
+ * Parameters are the memory interface signals
+ */
+define CPU() (node[32] Iaddr, Iin, Daddr, Din, Dout; 
+	      node IMC0, IMC1, DMC0, DMC1)
+{
+
+
+  /* pipeline registers for the program counter */
+  Bus(32) PC, PC1, PC2, PC3, PC4;
+
+  posBusFLOP(32) (PC, PC1);
+  posBusFLOP(32) (PC1, PC2);
+  posBusFLOP(32) (PC2, PC3);
+  posBusFLOP(32) (PC3, PC4);
+
+  /* pipeline registers for the instruction */
+  Bus(32) IR, IR1, IR2, IR3, IR4;
+
+  posBusFLOP(32) (IR, IR1);
+  posBusFLOP(32) (IR1, IR2);
+  posBusFLOP(32) (IR2, IR3);
+  posBusFLOP(32) (IR3, IR4);
+
+  /* register file */
+  RF r;
+  /* Yeah, it's here */
+
+
+  /* flopped version of output of register file */
+  Bus(32) A2, B2, B3;
+
+ /* don't need this, we called them RT and RS posBusFLOP(32) (r.A,A2);
+  posBusFLOP(32) (r.B,B2);
+
+  posBusFLOP(32) (B2, B3);
+*/
+	
+   
+Bus(32) target, RS,RT,IMM,Aluresult,Aluresult2,Aluresult3, Shift, LW, Dataout,Datain,RS2, RT2,RT3,target2,IMM2,Datatoex, Datatoex1, Datatoex2, Datatoex3, LW2;
+
+node dobranch,dojump,1ext,write,write2, dobranch2, dojump2,alu1, alu2, alu3,  beq, bne, blez, bgtz, bgez, bltz, bgezal, bltzal, j, jr, jalr, jal, lui, cmpto0, targetrs, temp31, dowrite,sllv, srav, srlv, lb, lh, lw, lbu, lhu, sb, sh, sw, bjwrite,isimm, varshift, bjwrite2, bjwrite3, bjwrite4;
+
+/*Note: Variables are numbered based on when they will come up. ie, 'writeback variables in earlier stages will have higher numbers than those in later stages*/
+
+/*the number of the register to write to*/
+node[5] rw, rw2, rw3,rw4,rw2out, rdout, rdout1;
+ALUctrl aluc;
+
+IMC0=GND;
+IMC1=GND;
+
+/*Instruction Fetch Stage*/
+IFctrl() i(dobranch2, dojump2);
+IF() a(PC, IR, target2, Iin, Iaddr, i);
+
+/*Register Decode Stage*/
+RDctrl() rctl(IR1, 1ext, write2, rw4, dobranch, dojump,  beq, bne, blez, bgtz, bgez, bltz, bgezal, bltzal, j, jr, jalr, jal, lui, cmpto0, targetrs, temp31,bjwrite);
+RD() b(IR1,PC1, RS, RT, IMM, rctl, r, Datain, target, Datatoex, rdout);
+
+/*Execution Stace*/
+EXctrl() exctl(IR2,isimm, varshift, alu1,sllv, srav, srlv, aluc);
+EX() d(IR2,RS2,RT2,IMM2,Aluresult,exctl,rw,rdout1,bjwrite2);
+
+/*Memory Control Stage*/
+MEMctrl() mctrl(IR3, DMC0,DMC1, lb, lh, lw, lbu, lhu, sb, sh, sw,rw2,rw2out);
+MEM() m(IR3,RT3,LW,Aluresult2,Din, Dout, Daddr,mctrl);
+
+/*Write back stage*/
+WBctrl wctrl(IR4, write, alu3, bjwrite4);
+WB() w(PC4, Aluresult3,LW2,Dataout,Datatoex3, wctrl);
+
+
+/*Flop the values through so they will be ready when needed.*/ 
+posFLOP() (alu1,alu2);
+posFLOP() (alu2,alu3);
+posFLOP() (dojump, dojump2);
+posFLOP() (dobranch, dobranch2);
+posBusFLOP(32) (target, target2);
+write2=write;
+posFLOP() (bjwrite, bjwrite2);
+posFLOP() (bjwrite2, bjwrite3);
+posFLOP() (bjwrite3, bjwrite4);
+				
+posBusFLOP(32) (LW, LW2);
+
+/*Flop along the register to write*/
+<j1:5: posFLOP() (rw[j1],rw2[j1]);>
+<j2:5: posFLOP() (rw2out[j2],rw3[j2]);>
+rw4=rw3;
+<j3:5: posFLOP() (rdout[j3],rdout1[j3]);>
+
+	
+
+posBusFLOP(32) (RT, RT2);
+posBusFLOP(32) (RT2, RT3);
+posBusFLOP(32) (IMM, IMM2);
+posBusFLOP(32) (Aluresult, Aluresult2);
+posBusFLOP(32) (Aluresult2, Aluresult3);
+posBusFLOP(32) (RS, RS2);
+Dataout=Datain;
+posBusFLOP(32) (Datatoex, Datatoex1);
+posBusFLOP(32) (Datatoex1, Datatoex2);
+posBusFLOP(32) (Datatoex2, Datatoex3);	
+}
+
+
+/*
+ * Instantiate the memory interface signals, and the CPU module
+ */ 
+node[32] Iaddr, Iin, Daddr, Din, Dout;
+node IMC0, IMC1, DMC0, DMC1;
+
+CPU c;
+
+c.Iin = Iin;
+c.Din = Din;
+
+<i:32: "314/buffer"() (c.Iaddr[i],Iaddr[i]);
+       "314/buffer"() (c.Daddr[i],Daddr[i]);
+       "314/buffer"() (c.Dout[i],Dout[i]);>
+"314/buffer"() (c.IMC0, IMC0);
+"314/buffer"() (c.IMC1, IMC1);
+"314/buffer"() (c.DMC0, DMC0);
+"314/buffer"() (c.DMC1, DMC1);

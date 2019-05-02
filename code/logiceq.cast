@@ -1,0 +1,272 @@
+Logic Equation File: 
+	This file contains the logic equations used to implement MIPS instruction decoding for Bill Pottle and Eric Hoffman. Irr is a 32 bit bus containing the instruction and the instructions are set. Inverse is determined by _ and + and * mean or and and respectively. 
+
+
+Bus(32) _Irr;
+
+
+
+/*Opcodebra equals one if Opcode = 000XXX*/
+_Irr.d[31]* _Irr.d[30]*Irr.d[29]= Opcodebra);
+
+/*Opcodebrb equals one for bgez, bltz, bltzal, and bgezal if Opcode = 000001*/
+Opcodebra* _Irr.d[28]*_Irr.d[27]*Irr.d[26]=Opcodebrb
+
+/*beq*/
+Opcodebra* Irr.d[28]* _Irr.d[27]* _Irr.d[26]= beq
+
+/*bne*/
+Opcodebra* Irr.d[28]* _Irr.d[27]* Irr.d[26]=bne
+
+/*blez*/
+Opcodebra* Irr.d[28]* Irr.d[27]* _Irr.d[26]=blez
+
+/*bgtz*/
+Opcodebra* Irr.d[28]* Irr.d[27]* Irr.d[26]=bgtz
+
+/*bgez*/
+Opcodebrb*_Irr.d[20]* Irr.d[16]=bgez
+
+/*bltz*/
+Opcodebrb* _Irr.d[20]* _Irr.d[16]=bltz
+
+/*bgezal*/
+Opcodebrb* Irr.d[20]* Irr.d[16]=bgezal
+
+/*bltzal*/
+Opcodebrb* Irr.d[20]* _Irr.d[16]= bltzal
+
+/*Opcodeja equals one for jumps and  Opcode = xxx000*/
+_Irr.d[28]* _Irr.d[27]* _Irr.d[26]= Opcodeja
+
+/*Opcodejb equals one for jr and jalr for Opcode = 000000*/
+Opcodebra* Opcodeja*_Irr.d[5]*_Irr.d[4]= Opcodejb
+
+/*j*/
+Opcodebra* _Irr.d[28]* Irr.d[27]* _Irr.d[26]=j
+
+/*jal*/
+Opcodebra* _Irr.d[28]* Irr.d[27]* Irr.d[26]=jal
+
+/*jr*/
+Opcodejb* Irr.d[3]*_Irr.d[2]*_Irr.d[1]* _Irr.d[0]=jr
+
+/*jalr*/
+Opcodejb* Irr.d[3]*_Irr.d[2]* _Irr.d[1]* Irr.d[0]=jalr
+
+/*lui (Opcode 001111)*/
+_Irr.d[31]* _Irr.d[30]* Irr.d[29]* Irr.d[28]* Irr.d[27]* Irr.d[26]=lui
+
+
+/*decide which bus (bus=0 or RS to send to compare based on control*/
+blez+bgtz+bltz+bgez + bltzal+bgezal+y.out=cmpto0
+
+/*Set dojump for a jump*/
+j+ jal+ jr+ jalr= dojump
+
+/*target = rs for jr and jalr*/
+jr+ jalr= targetrs
+
+/*set register to write to $31 for andlink*/
+jal+ bltzal+ bgezal= temp31
+
+/*determine whether to write for branches and jumps*/
+lui+ jal+ jalr+ bltzal+ bgezal+ bjwrite
+
+
+
+
+
+/* 1ext? is 0 if it is an unsigned number, 1 if it is a signed number*/
+/*Jumps use an absolute address so 1ext is only set for ALU operations (andi addi and other logical immediate ops and branches) and mem operations*/
+/*For unsigned operations 1ext is 0 which is the same as 0 extending */ 
+/*1ext will be 0 for lui*/
+
+node _0exttemp,_0exttemp2;
+
+/*Determine whether to 1 ext*/
+Irr.d[31]+Irr.d[30]+ Irr.d[29]+Irr.d[28]+Irr.d[27]+Irr.d[26]= 1exttemp);
+
+
+/*check for 0ext for lbu and lhu*/
+Irr.d[31]* _Irr.d[30]* _Irr.d[29]* Irr.d[28]* _Irr.d[27]* 0exttemp
+
+/*check for 1ext or 0ext for logical ops*/
+_Irr.d[31]* _Irr.d[30]* Irr.d[29]* Irr.d[28]=0exttemp2
+1exttemp*_0exttemp*_0exttemp2= 1ext
+
+
+/*Determine whether the opcode is zero*/
+And4() a1(_Irr.d[31],_Irr.d[30], _Irr.d[29],_Irr.d[28]);
+And3() (a1.out, _Irr.d[27], _Irr.d[26], opzero);
+
+
+
+EX Logic Equations
+
+
+/*Function field for shift = 000xxx*/
+opzero* _Irr.d[5]* _Irr.d[4]* _Irr.d[3]= shift
+
+/*Function field for arith = 1000xx*/
+opzero* Irr.d[5]* _Irr.d[4]* _Irr.d[3]* _Irr.d[2]= arith
+
+/*Function field for logic  = 1001xx*/
+opzero* Irr.d[5]* _Irr.d[4]* _Irr.d[3]* Irr.d[2]=logic
+
+/*Function field for stl  = 10101x */
+Irr.d[5]* _Irr.d[4]* Irr.d[3]* _Irr.d[2]* Irr.d[1]= setless
+
+/*Determine if shift left* right* variable* or no variable shift*/
+_Irr.d[1]* _Irr.d[0]= left)
+var=Irr.d[2];
+varshift=var;
+nv=_Irr.d[2];
+right=Irr.d[1];
+
+
+
+/*sll*/
+shift* nv* left= slltemp
+
+/*srl*/
+shift* nv* right* _Irr.d[0]= srltemp
+
+/*sra*/
+shift* nv* right* Irr.d[0]= sratemp
+
+/*sllv*/
+shift* var* left=sllv
+
+/*srlv*/
+shift* var* right* _Irr.d[0]= srlv
+
+/*srav*/
+shift* var* right* Irr.d[0]= srav
+
+/*add*/
+arith* _Irr.d[1]= add
+
+/*sub*/
+arith* Irr.d[1]= aluc.sub
+
+/*and*/
+logic* _Irr.d[1]* _Irr.d[0]= and
+
+/*or*/
+logic* _Irr.d[1]* Irr.d[0]= or
+
+/*xor*/
+logic* Irr.d[1]* _Irr.d[0]= xor
+
+/*nor*/
+logic* Irr.d[1]* Irr.d[0]= aluc.nor
+
+/*slt*/
+setless* _Irr.d[0]=slt
+
+/*sltu*/
+setless* Irr.d[0]=sltu
+
+/*Now Decode immediate ALU instructions*/
+/*Control Note: alu operations with immediate can be specified in the ALUctrl* with only an extra bit in EX being set if the instruction is to be performed with an immediate*/
+
+/*Determine if there is an aluimm*/
+_Irr.d[31]* _Irr.d[30]* Irr.d[29]=aluimm
+
+/*addi and addiu*/
+aluimm*_Irr.d[28]* _Irr.d[27]=addiaddiu
+
+/*slti*/
+aluimm* _Irr.d[28]* Irr.d[27]* _Irr.d[26]* slti  
+
+/*sltiu*/
+aluimm* _Irr.d[28]* Irr.d[27]* Irr.d[26]= sltiu
+
+/*andi*/
+aluimm* Irr.d[28]* _Irr.d[27]* _Irr.d[26]= andi
+
+/*ori*/
+aluimm* Irr.d[28]* _Irr.d[27]* Irr.d[26]= ori
+
+/*xori*/
+aluimm* Irr.d[28]* Irr.d[27]* _Irr.d[26]= xori
+
+
+/*Determine final control signals sent to ALU*/
+/* Include add for memory operations*/
+add+ addiaddiu+Irr.d[31]= aluc.add
+slt+ slti= aluc.slt);
+sltu+ sltiu= aluc.sltu
+and+ andi= aluc.and
+or+ ori= aluc.or
+xor+ xori= aluc.xor
+sratemp+ srav= aluc.sra
+srltemp+ srlv= aluc.srl
+slltemp+ sllv= aluc.sll
+
+
+
+
+/*isimm=true for andi, addi, addiu, ori, xori, slti, sltiu. 1ext is decoded in rd.cast and so the immediate that comes through is the correct one.*/
+And3() (_Irr.d[31],_Irr.d[30],Irr.d[29],isimmtemp);
+Or2() (isimmtemp, Irr.d[31], isimm);
+
+
+node alu1temp;
+
+/*determine if the alu needs to be used*/
+aluc.add+ aluc.sub+ aluc.and+ aluc.or+ aluc.nor+ aluc.xor+ aluc.sll + aluc.srl+ aluc.sra+sllv o3.out+ srlv+aluc.slt+ aluc.sltu+alu1temp alu1temp+ _Irr.d[31]=alu1);
+
+
+MEM Controls 
+
+
+/*Opcode for Load/Store = 10xxxx*/
+Irr.d[31]* _Irr.d[30]=lsa);
+
+/*Opcode for store = 1010xx*/
+lsa* Irr.d[29]* _Irr.d[28]* store);
+
+/*Opcode for load = 100xxx*/
+lsa* _Irr.d[29]= load);
+
+/*Opcode for load/store bite = xxxx00*/
+_Irr.d[27]* _Irr.d[26]= bite);
+
+/*Opcode for half = xxxx01*/
+_Irr.d[27]* Irr.d[26]= half
+
+/*Opcode for word = xxxx11*/
+  Irr.d[27]* Irr.d[26]= xword 
+/*lb*/
+ load* bite* _Irr.d[28]= lb 
+
+/*lh*/
+  load* half* _Irr.d[28]= lh 
+
+/*lw*/
+  load* word* _Irr.d[28]= lw 
+
+/*lbu*/
+  load* bite* Irr.d[28]= lbu 
+
+/*lhu*/
+  load* half* Irr.d[28]= lhu 
+
+/*sb*/
+  store* bite= sb 
+
+/*sh*/
+  store* half= sh 
+
+/*sw*/
+  store* word= sw 
+node memop;
+ lb+lh+lw+lbu+lhu+sb + sh+ sw=memop 
+
+
+
+
+
+
