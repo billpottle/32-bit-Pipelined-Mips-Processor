@@ -8,12 +8,12 @@ The processor executes parts of 5 instructions at once through the use of variou
 
 In the diagrams below, a thick line representes up to 32 wires, and three dots signify a jump between the first and last copy of an element. 
 IF Stage
-![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/IF.jpg)
+![IF Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/IFetch.jpg)
 RD Stage
-![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/RD.jpg)
+![RD Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/RD.jpg)
 EX Stage
-![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/EX.jpg)
+![EX Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/EX.jpg)
 MEM Stage
-![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/MEM.jpg)
+![MEM Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/MEM.jpg)
 WB Stage
-![CPU Overview](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/WB.jpg)
+![WB Stage](https://github.com/billpottle/32-bit-Pipenlined-Mips-Processor/blob/master/images/WB.jpg)
